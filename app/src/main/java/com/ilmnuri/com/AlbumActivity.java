@@ -117,8 +117,6 @@ public class AlbumActivity extends BaseActivity {
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
-                        // No button clicked
-                        // do nothing
                         break;
                 }
             }
