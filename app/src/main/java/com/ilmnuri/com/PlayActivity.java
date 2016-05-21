@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -37,10 +38,7 @@ public class PlayActivity extends BaseActivity {
 
 
     public static final int DIALOG_DOWNLOAD_PROGRESS = 0;
-    private ProgressDialog mProgressDialog;
-    //
-//    private  RequestQueue mRequestQueue;
-//    private  SimpleImageLoader mImageLoader;
+
     private Context mContext;
 
     private ImageView imageView;
@@ -64,8 +62,13 @@ public class PlayActivity extends BaseActivity {
         initUI();
 
         dir = new File(getExternalFilesDir(null), "audio");
-        if (!dir.exists()) {
-            dir.mkdir();
+        boolean isDirectoryCreated=dir.exists();
+        if (!isDirectoryCreated) {
+            isDirectoryCreated= dir.mkdirs();
+        }
+        if(isDirectoryCreated) {
+            // do something
+            Log.d("mkdirs option", "Directory already exists.");
         }
 
         if (Utils.checkFileExist(dir.getPath() + "/" + fileName)) {
@@ -75,9 +78,7 @@ public class PlayActivity extends BaseActivity {
             }
 
         } else {
-            if (isNetworkAvailable()) {
-//                downloadAudio(url);
-            } else {
+            if (!isNetworkAvailable()) {
                 Utils.showToast(PlayActivity.this, "INTERNET YO'Q! Yuklay olmaysiz!");
                 finish();
             }
@@ -125,8 +126,13 @@ public class PlayActivity extends BaseActivity {
     private void initVariables() {
         mContext = this;
         dir = new File(getExternalFilesDir(null), "audio");
-        if (!dir.exists()) {
-            dir.mkdir();
+        boolean isDirectoryCreated=dir.exists();
+        if (!isDirectoryCreated) {
+            isDirectoryCreated= dir.mkdirs();
+        }
+        if(isDirectoryCreated) {
+            // do something
+            Log.d("mkdirs option", "Directory already exists.");
         }
 
         readExternalStoragePermission = false;
@@ -148,13 +154,17 @@ public class PlayActivity extends BaseActivity {
     private void initUI() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        tvTitle = (TextView) toolbar.findViewById(R.id.tv_play_title);
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        if (toolbar != null) {
+            tvTitle = (TextView) toolbar.findViewById(R.id.tv_play_title);
+        }
         tvTitle.setText(trackPath.replace(".mp3", "").replace("_", " "));
 
         imageView = (ImageView) findViewById(R.id.iv_play);
 
-        mProgressDialog = new ProgressDialog(this);
+        ProgressDialog mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Downloading file..");
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mProgressDialog.setCancelable(false);
@@ -186,10 +196,8 @@ public class PlayActivity extends BaseActivity {
     private MediaPlayer mediaPlayer;
     public TextView duration;
     private double timeElapsed = 0, finalTime = 0;
-    private int forwardTime = 2000, backwardTime = 2000;
     private Handler durationHandler = new Handler();
     private SeekBar seekbar;
-    private ImageButton btnStart;
 
     public void initMediaPlayer() {
         mediaPlayer = MediaPlayer.create(this, Uri.parse(dir.getPath() + "/" + fileName));
@@ -198,8 +206,12 @@ public class PlayActivity extends BaseActivity {
         duration = (TextView) findViewById(R.id.songDuration);
         seekbar = (SeekBar) findViewById(R.id.seekBar);
 
-        seekbar.setMax((int) finalTime);
-        seekbar.setClickable(true);
+        if (seekbar != null) {
+            seekbar.setMax((int) finalTime);
+        }
+        if (seekbar != null) {
+            seekbar.setClickable(true);
+        }
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -220,13 +232,15 @@ public class PlayActivity extends BaseActivity {
             }
         });
 
-        btnStart = (ImageButton) findViewById(R.id.media_play);
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                play();
-            }
-        });
+        ImageButton btnStart = (ImageButton) findViewById(R.id.media_play);
+        if (btnStart != null) {
+            btnStart.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    play();
+                }
+            });
+        }
         if (mediaPlayer != null) {
             play();
         }
@@ -284,6 +298,7 @@ public class PlayActivity extends BaseActivity {
     // go forward at forwardTime seconds
     public void forward(View view) {
         //check if we can go forward at forwardTime seconds before song endes
+        int forwardTime = 2000;
         if ((timeElapsed + forwardTime) <= finalTime) {
             timeElapsed = timeElapsed + forwardTime;
 
@@ -295,6 +310,7 @@ public class PlayActivity extends BaseActivity {
     // go backwards at backwardTime seconds
     public void rewind(View view) {
         //check if we can go back at backwardTime seconds after song starts
+        int backwardTime = 2000;
         if ((timeElapsed - backwardTime) > 0) {
             timeElapsed = timeElapsed - backwardTime;
 
