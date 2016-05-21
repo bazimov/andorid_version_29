@@ -9,10 +9,9 @@ public class AudioEvent {
     private Type type;
     private Audio mAudio;
 
-    public static AudioEvent download(Audio id) {
+    public static AudioEvent update() {
         AudioEvent e = new AudioEvent();
-        e.type = Type.DOWNLOAD;
-        e.mAudio = id;
+        e.type = Type.UPDATE;
         return e;
     }
 
@@ -26,7 +25,7 @@ public class AudioEvent {
     }
 
     public enum Type {
-        DOWNLOAD,
+        UPDATE,
         STOP;
     }
 
