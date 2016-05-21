@@ -8,13 +8,12 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ilmnuri.com.event.AudioEvent;
 import com.ilmnuri.com.model.Audio;
-import com.ilmnuri.com.model.Global;
-import com.ilmnuri.com.utility.Utils;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -32,23 +31,28 @@ public class DownloadHelper extends Service {
     private Audio mAudio;
     private HashMap<Long, Audio> specialFeedItem;
     Gson mGson;
+    private int counter = 0;
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-
         return null;
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void onCreate() {
+        specialFeedItem = new HashMap<>();
+        super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(final Intent intent, int flags, final int startId) {
 
         if (intent != null) {
             mGson = new Gson();
             String filePath = intent.getStringExtra("file_path");
             String fileName = intent.getStringExtra("file_name");
             String audio = intent.getStringExtra("audio");
-            specialFeedItem = new HashMap<>();
             Type type = new TypeToken<Audio>() {
             }.getType();
             mAudio = mGson.fromJson(audio, type);
@@ -62,59 +66,52 @@ public class DownloadHelper extends Service {
             DownloadManager.Request request = new DownloadManager.Request(download_uri);
             request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
             request.setAllowedOverRoaming(false);
-            request.setDescription("Test");
-            request.setTitle("Test");
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
+            request.setDescription(mAudio.getTrackName());
+            request.setTitle("test");
             request.setDestinationInExternalFilesDir(this, dir.getName(), fileName);
             final long enqueue = downloadManager.enqueue(request);
 
             specialFeedItem.put(enqueue, mAudio);
-            Global.getInstance().setAudio(mAudio);
-            EventBus.getDefault().post(AudioEvent.download(mAudio));
-
+            specialFeedItem.get(enqueue).setDownloaded(false);
             new Thread(new Runnable() {
 
                 @Override
                 public void run() {
 
-                    boolean downloading = true;
+                    try {
+                        boolean downloading = true;
 
-                    while (downloading) {
+                        while (downloading) {
 
-                        DownloadManager.Query q = new DownloadManager.Query();
+                            DownloadManager.Query q = new DownloadManager.Query();
+                            q.setFilterById(enqueue);
 
-                        q.setFilterById(enqueue);
+                            Cursor cursor = downloadManager.query(q);
+                            if (cursor.moveToFirst()) {
+                                if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
+                                    downloading = false;
+                                    if (specialFeedItem.get(enqueue) != null) {
+                                        Audio audio1 = specialFeedItem.get(enqueue);
+                                        specialFeedItem.get(enqueue).setDownloaded(true);
+                                        EventBus.getDefault().post(AudioEvent.stop(audio1));
+//                                        Toast.makeText(DownloadHelper.this, audio1.getTrackName() + " yuklandi.", Toast.LENGTH_SHORT).show();
+                                        counter++;
+                                    }
 
-                        Cursor cursor = downloadManager.query(q);
-                        cursor.moveToFirst();
-                        int bytes_downloaded = cursor.getInt(cursor
-                                .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-                        final int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-
-                        if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-                            downloading = false;
-//                        mProgressDialog.dismiss();
-//                        if (readExternalStoragePermission) {
-//                            initMediaPlayer();
-//                        }
-//                        Utils.showToast(getApplicationContext(), "Darslik yuklandi, endi ijro etilmoqda");
-                            EventBus.getDefault().post(AudioEvent.stop(mAudio));
-                            Global.getInstance().setAudio(null);
-                        } else {
-                            if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_FAILED) {
-                                Utils.showToast(getApplicationContext(), "Yuklashda xatolik bo'ldi?");
-
+                                } else {
+                                    if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_FAILED) {
+//                                        Utils.showToast(DownloadHelper.this, "Yuklashda xatolik bo'ldi?");
+                                    }
+                                }
+                                cursor.close();
                             }
                         }
+                    } finally {
+                        if (specialFeedItem.size() == counter) {
+                            EventBus.getDefault().post(AudioEvent.update());
+                            Log.d("Service ", " is done his job ");
 
-
-
-                        final int dl_progress = (int) ((bytes_downloaded * 100l) / bytes_total);
-
-
-                        Global.getInstance().setCurrent_position(dl_progress);
-
-                        cursor.close();
+                        }
                     }
 
                 }

@@ -163,8 +163,14 @@ public class AlbumActivity extends BaseActivity {
 
     public void onEvent(AudioEvent event) {
         if (adpaterDemo != null) {
-            adpaterDemo.onEvent(event);
+            if (event.getType() == AudioEvent.Type.STOP) {
+                adpaterDemo.onEvent(event);
+            } else if (event.getType() == AudioEvent.Type.UPDATE) {
+                adpaterDemo.notifyDataSetChanged();
+            }
         }
+
+
     }
 
     @Override

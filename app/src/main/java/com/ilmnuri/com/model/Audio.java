@@ -14,6 +14,16 @@ public class Audio {
     @SerializedName("song_size")
     private String trackSize;
 
+    private boolean isDownloaded;
+
+    public boolean isDownloaded() {
+        return isDownloaded;
+    }
+
+    public void setDownloaded(boolean downloaded) {
+        isDownloaded = downloaded;
+    }
+
     public String getTrackName() {
         return trackName;
     }
