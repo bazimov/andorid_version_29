@@ -225,7 +225,11 @@ public class PlayActivity extends BaseActivity {
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                play();
+`                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                } else {
+                    play();
+                }
             }
         });
         if (mediaPlayer != null) {
