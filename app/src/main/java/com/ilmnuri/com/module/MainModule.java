@@ -40,7 +40,8 @@ import retrofit.converter.GsonConverter;
                 ExceptionViewActivity.class,
                 PlayActivity.class,
                 SplashActivity.class,
-                BaseActivity.class
+                BaseActivity.class,
+                MainActivity.DesignDemoFragment.class
         }
 )
 
