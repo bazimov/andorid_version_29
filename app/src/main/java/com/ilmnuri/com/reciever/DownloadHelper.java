@@ -110,7 +110,6 @@ public class DownloadHelper extends Service {
                         if (specialFeedItem.size() == counter) {
                             EventBus.getDefault().post(AudioEvent.update());
                             Log.d("Service ", " is done his job ");
-
                         }
                     }
 

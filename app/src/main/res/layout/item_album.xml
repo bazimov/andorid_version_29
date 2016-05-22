@@ -85,7 +85,7 @@
             android:contentDescription="@string/delete"
             android:src="@drawable/ic_delete_24dp"
             android:textColor="@color/red"
-            android:visibility="gone"/>
+            android:visibility="invisible"/>
 
         <ImageButton
             android:id="@+id/btn_download"
