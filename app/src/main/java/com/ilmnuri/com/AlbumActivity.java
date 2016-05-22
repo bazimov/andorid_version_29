@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.ilmnuri.com.adapter.AlbumAdpaterDemo;
+import com.ilmnuri.com.adapter.AlbumAdapterDemo;
 import com.ilmnuri.com.event.AudioEvent;
 import com.ilmnuri.com.model.AlbumModel;
 import com.ilmnuri.com.model.Api;
@@ -40,7 +40,7 @@ public class AlbumActivity extends BaseActivity {
     String fileName;
 
     private AlbumModel albumModel;
-    AlbumAdpaterDemo adpaterDemo;
+    AlbumAdapterDemo adpaterDemo;
 
     Gson mGson;
 
@@ -83,11 +83,11 @@ public class AlbumActivity extends BaseActivity {
         tvTitle.setText(albumModel.getCategory() + "/" + albumModel.getAlbum());
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
-        adpaterDemo = new AlbumAdpaterDemo(this, albumModel, mOnItemClickListener);
+        adpaterDemo = new AlbumAdapterDemo(this, albumModel, mOnItemClickListener);
         mRecyclerView.setAdapter(adpaterDemo);
     }
 
-    AlbumAdpaterDemo.OnItemClickListener mOnItemClickListener = new AlbumAdpaterDemo.OnItemClickListener() {
+    AlbumAdapterDemo.OnItemClickListener mOnItemClickListener = new AlbumAdapterDemo.OnItemClickListener() {
         @Override
         public void onDeleteListener(AlbumModel model, int position) {
             String title = model.getAudios().get(position).getTrackName();
@@ -161,12 +161,22 @@ public class AlbumActivity extends BaseActivity {
                 .setNegativeButton("Yo'q", dialogClickListener).show();
     }
 
-    public void onEvent(AudioEvent event) {
+    public void onEvent(final AudioEvent event) {
         if (adpaterDemo != null) {
             if (event.getType() == AudioEvent.Type.STOP) {
-                adpaterDemo.onEvent(event);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adpaterDemo.onEvent(event);
+                    }
+                });
             } else if (event.getType() == AudioEvent.Type.UPDATE) {
-                adpaterDemo.notifyDataSetChanged();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adpaterDemo.notifyDataSetChanged();
+                    }
+                });
             }
         }
 

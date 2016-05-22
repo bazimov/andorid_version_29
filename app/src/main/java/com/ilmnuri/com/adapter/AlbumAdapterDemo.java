@@ -1,6 +1,5 @@
 package com.ilmnuri.com.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -31,7 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
-public class AlbumAdpaterDemo extends RecyclerView.Adapter<AlbumAdpaterDemo.ViewHolder> {
+public class AlbumAdapterDemo extends RecyclerView.Adapter<AlbumAdapterDemo.ViewHolder> {
 
     private Context mContext;
     private AlbumModel mAlbumModel;
@@ -40,7 +39,7 @@ public class AlbumAdpaterDemo extends RecyclerView.Adapter<AlbumAdpaterDemo.View
     Handler handler;
     File dir;
 
-    public AlbumAdpaterDemo(Context context, AlbumModel albumModel, OnItemClickListener listener) {
+    public AlbumAdapterDemo(Context context, AlbumModel albumModel, OnItemClickListener listener) {
         mContext = context;
         mAlbumModel = albumModel;
         this.mOnItemClickListener = listener;
@@ -84,14 +83,14 @@ public class AlbumAdpaterDemo extends RecyclerView.Adapter<AlbumAdpaterDemo.View
 
         if (Utils.checkFileExist(dir.getPath() + "/" + mAlbumModel.getAudios().get(position).getTrackName())) {
             if (holder.btnDownload != null) {
-                holder.btnDownload.setVisibility(View.GONE);
+                holder.btnDownload.setVisibility(View.INVISIBLE);
             }
             if (holder.btnDelete != null) {
                 holder.btnDelete.setVisibility(View.VISIBLE);
             }
         } else {
             if (holder.btnDelete != null) {
-                holder.btnDelete.setVisibility(View.GONE);
+                holder.btnDelete.setVisibility(View.INVISIBLE);
             }
             if (holder.btnDownload != null) {
                 holder.btnDownload.setVisibility(View.VISIBLE);
@@ -118,8 +117,9 @@ public class AlbumAdpaterDemo extends RecyclerView.Adapter<AlbumAdpaterDemo.View
             case STOP:
                 for (ViewHolder vh : mViewHolders) {
                     if (vh != null) {
-                        Audio audio = mAlbumModel.getAudios().get(vh.getAdapterPosition());
-                        if (audio != null && audio.getTrackId() == (event.getAudio().getTrackId())) {
+                        Audio audio = getItem(vh.getAdapterPosition());
+                        if (audio != null && audio.getTrackId() == (event.getAudio().getTrackId())
+                                && audio.getTrackName().equals(event.getAudio().getTrackName())) {
                             vh.closeSeekBar(true);
                         }
                     }
@@ -168,9 +168,6 @@ public class AlbumAdpaterDemo extends RecyclerView.Adapter<AlbumAdpaterDemo.View
             Intent intent = new Intent(mContext, PlayActivity.class);
             intent.putExtra("category", mAlbumModel.getCategory());
             intent.putExtra("url", mAlbumModel.getCategory() + "/" + mAlbumModel.getAlbum() + "/" + mAlbumModel.getAudios().get(getAdapterPosition()).getTrackName());
-            if (mProgressBar != null) {
-                mProgressBar.setVisibility(View.INVISIBLE);
-            }
             mContext.startActivity(intent);
         }
 
@@ -184,7 +181,6 @@ public class AlbumAdpaterDemo extends RecyclerView.Adapter<AlbumAdpaterDemo.View
                     break;
                 case R.id.btn_download:
                     mOnItemClickListener.onDownloadListener(mAlbumModel, getAdapterPosition());
-
                     break;
             }
         }
@@ -192,79 +188,17 @@ public class AlbumAdpaterDemo extends RecyclerView.Adapter<AlbumAdpaterDemo.View
 
         public void closeSeekBar(boolean isSeekBar) {
             if (isSeekBar) {
-                ((Activity) mContext).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
 
-                btnDelete.setVisibility(View.VISIBLE);
-                btnDownload.setVisibility(View.GONE);
-                notifyItemChanged(getAdapterPosition());
-
-//                        Global.getInstance().setAudio(null);
-//                        handler.removeCallbacks(mUpdateTimeTask);
-            }
-                });
+                if (btnDownload != null) {
+                    btnDownload.setVisibility(View.GONE);
+                }
+                if (btnDelete != null) {
+                    btnDelete.setVisibility(View.VISIBLE);
+                }
 
             }
         }
 
-//        private Runnable mUpdateTimeTask = new Runnable() {
-//            public void run() {
-//                final int current_position = Global.getInstance().getCurrent_position();
-//
-//                if (mProgressBar != null) {
-//                    mProgressBar.setProgress(current_position);
-//                }
-//
-//
-//                handler.postDelayed(this, 100);
-//            }
-//        };
-//        private void activeSeekBar() {
-//
-//            ((Activity) mContext).runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (mProgressBar != null) {
-//                        mProgressBar.setVisibility(View.VISIBLE);
-//                    }
-//                }
-//            });
-//
-//            removeCallback();
-//            final int position = Global.getInstance().getCurrent_position();
-//
-//            if (mProgressBar != null) {
-//                mProgressBar.setProgress(position);
-//            }
-//
-//
-//            updateProgress();
-//        }
-//
-//        private void unActiveSeekBar() {
-//
-//            ((Activity) mContext).runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (mProgressBar != null) {
-//                        mProgressBar.setVisibility(View.GONE);
-//                    }
-//
-//                }
-//            });
-//
-//            removeCallback();
-//        }
-//
-//        public void removeCallback() {
-//            handler.removeCallbacks(mUpdateTimeTask);
-//        }
-//
-//        public void updateProgress() {
-//            handler.postDelayed(mUpdateTimeTask, 100);
-//        }
-//
     }
 
     public interface OnItemClickListener {
