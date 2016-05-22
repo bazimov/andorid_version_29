@@ -4,6 +4,7 @@ import android.app.DownloadManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -73,7 +74,7 @@ public class AlbumActivity extends BaseActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         assert toolbar != null;
-        dir = new File(getExternalFilesDir(null), "audio");
+        dir = new File(Environment.getExternalStorageDirectory(), "ilmnuri");
         if (!dir.exists()) {
             dir.mkdir();
         }

@@ -86,6 +86,10 @@ public class AlbumAdapterDemo extends RecyclerView.Adapter<AlbumAdapterDemo.View
             if (holder.btnDownload != null) {
                 holder.btnDownload.setVisibility(View.INVISIBLE);
             }
+            if (holder.mLinearLayout != null) {
+                holder.mLinearLayout.setEnabled(true);
+                holder.mLinearLayout.setClickable(true);
+            }
             if (holder.btnDelete != null) {
                 holder.btnDelete.setVisibility(View.VISIBLE);
             }
