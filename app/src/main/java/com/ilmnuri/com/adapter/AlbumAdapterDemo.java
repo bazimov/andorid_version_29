@@ -2,6 +2,7 @@ package com.ilmnuri.com.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -43,7 +44,7 @@ public class AlbumAdapterDemo extends RecyclerView.Adapter<AlbumAdapterDemo.View
         mContext = context;
         mAlbumModel = albumModel;
         this.mOnItemClickListener = listener;
-        dir = new File(context.getExternalFilesDir(null), "audio");
+        dir = new File(Environment.getExternalStorageDirectory(), "ilmnuri");
         boolean isDirectoryCreated = dir.exists();
         if (!isDirectoryCreated) {
             isDirectoryCreated = dir.mkdirs();
@@ -91,6 +92,10 @@ public class AlbumAdapterDemo extends RecyclerView.Adapter<AlbumAdapterDemo.View
         } else {
             if (holder.btnDelete != null) {
                 holder.btnDelete.setVisibility(View.INVISIBLE);
+            }
+            if (holder.mLinearLayout != null) {
+                holder.mLinearLayout.setEnabled(false);
+                holder.mLinearLayout.setClickable(false);
             }
             if (holder.btnDownload != null) {
                 holder.btnDownload.setVisibility(View.VISIBLE);
@@ -194,6 +199,10 @@ public class AlbumAdapterDemo extends RecyclerView.Adapter<AlbumAdapterDemo.View
                 }
                 if (btnDelete != null) {
                     btnDelete.setVisibility(View.VISIBLE);
+                }
+                if (mLinearLayout != null) {
+                    mLinearLayout.setEnabled(true);
+                    mLinearLayout.setClickable(true);
                 }
 
             }

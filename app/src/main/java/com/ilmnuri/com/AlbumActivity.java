@@ -19,6 +19,7 @@ import com.ilmnuri.com.model.AlbumModel;
 import com.ilmnuri.com.model.Api;
 import com.ilmnuri.com.model.Audio;
 import com.ilmnuri.com.reciever.DownloadHelper;
+import com.ilmnuri.com.utility.DividerItemDecoration;
 import com.ilmnuri.com.utility.Utils;
 
 import java.io.File;
@@ -79,6 +80,7 @@ public class AlbumActivity extends BaseActivity {
         tvTitle.setText(albumModel.getCategory() + "/" + albumModel.getAlbum());
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
         adpaterDemo = new AlbumAdapterDemo(this, albumModel, mOnItemClickListener);
         mRecyclerView.setAdapter(adpaterDemo);
     }

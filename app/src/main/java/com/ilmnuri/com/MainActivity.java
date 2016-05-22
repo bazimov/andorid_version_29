@@ -23,6 +23,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -44,14 +45,25 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.gson.Gson;
 import com.ilmnuri.com.adapter.DesignDemoRecyclerAdapter;
+import com.ilmnuri.com.api.IlmApi;
+import com.ilmnuri.com.application.IlmApplication;
 import com.ilmnuri.com.model.AlbumModel;
 import com.ilmnuri.com.model.Audio;
 import com.ilmnuri.com.model.Category;
 import com.ilmnuri.com.model.Global;
+import com.ilmnuri.com.model.ListAlbumResult;
+import com.ilmnuri.com.utility.CacheUtils;
 import com.ilmnuri.com.utility.Utils;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 public class MainActivity extends BaseActivity {
@@ -321,6 +333,17 @@ public class MainActivity extends BaseActivity {
         private static final String TAB_POSITION = "tab_position";
         String[] category;
 
+        @Bind(R.id.recycler_view)
+        RecyclerView mRecyclerView;
+        @Bind(R.id.swipe_refresh_layout)
+        SwipeRefreshLayout mSwipeRefreshLayout;
+
+        @Inject
+        IlmApi mApi;
+
+        @Inject
+        CacheUtils mCacheUtils;
+        private ArrayList<AlbumModel> albumModels;
 
         public DesignDemoFragment() {
             category = new String[3];
@@ -338,24 +361,72 @@ public class MainActivity extends BaseActivity {
             return fragment;
         }
 
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+            ((IlmApplication) getActivity().getApplication()).inject(this);
+        }
+
         @Nullable
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             Bundle args = getArguments();
             int tabPosition = args.getInt(TAB_POSITION);
+            View v = inflater.inflate(R.layout.fragment_list_view, container, false);
+            ButterKnife.bind(this, v);
 
             String searchKey = MainActivity.getSearchKey();
             ArrayList<AlbumModel> arrayList = Global.getInstance().getAlbums(category[tabPosition]);
             arrayList = MainActivity.filter(arrayList, searchKey);
 
-            View v = inflater.inflate(R.layout.fragment_list_view, container, false);
-            RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recyclerview);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            recyclerView.setAdapter(new DesignDemoRecyclerAdapter(arrayList, listener));
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            mRecyclerView.setAdapter(new DesignDemoRecyclerAdapter(arrayList, listener));
 
-
+            mSwipeRefreshLayout.requestDisallowInterceptTouchEvent(true);
+            mSwipeRefreshLayout.setColorSchemeResources(R.color.primary, R.color.primary_dark);
+            mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    reloadContent();
+                }
+            });
             return v;
         }
+
+        private void reloadContent() {
+            albumModels = new ArrayList<>();
+            mApi.getAlbums(new Callback<ListAlbumResult>() {
+                @Override
+                public void success(ListAlbumResult listAlbumResult, Response response) {
+                    if (listAlbumResult != null) {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        albumModels.addAll(listAlbumResult.getAlbumModels());
+                        Global.getInstance().setArrayList(albumModels);
+                        Bundle args = getArguments();
+                        int tabPosition = args.getInt(TAB_POSITION);
+                        ArrayList<AlbumModel> arrayList = Global.getInstance().getAlbums(category[tabPosition]);
+                        arrayList = MainActivity.filter(arrayList, searchKey);
+
+                        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                        mRecyclerView.setAdapter(new DesignDemoRecyclerAdapter(arrayList, listener));
+                        mCacheUtils.saveToCache(albumModels);
+                    }
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    if (error.getKind() == RetrofitError.Kind.NETWORK) {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        Utils.showToast(getActivity(), "Internetga ulangan emassiz yoki Tarmoqda biron bir xatolik bo'ldi!");
+                        Global.getInstance().setArrayList(mCacheUtils.getAlbums());
+                    }
+                }
+
+            });
+
+
+        }
+
 
         DesignDemoRecyclerAdapter.OnItemClickListener listener = new DesignDemoRecyclerAdapter.OnItemClickListener() {
             @Override

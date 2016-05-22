@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -56,7 +57,7 @@ public class DownloadHelper extends Service {
             Type type = new TypeToken<Audio>() {
             }.getType();
             mAudio = mGson.fromJson(audio, type);
-            dir = new File(getExternalFilesDir(null), "audio");
+            dir = new File(Environment.getExternalStorageDirectory() + "/ilmnuri");
             if (!dir.exists()) {
                 dir.mkdir();
             }
@@ -68,7 +69,7 @@ public class DownloadHelper extends Service {
             request.setAllowedOverRoaming(false);
             request.setDescription(mAudio.getTrackName());
             request.setTitle("test");
-            request.setDestinationInExternalFilesDir(this, dir.getName(), fileName);
+            request.setDestinationInExternalPublicDir("/ilmnuri", fileName);
             final long enqueue = downloadManager.enqueue(request);
 
             specialFeedItem.put(enqueue, mAudio);
