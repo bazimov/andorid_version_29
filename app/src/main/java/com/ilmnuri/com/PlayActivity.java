@@ -19,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -30,6 +29,10 @@ import com.ilmnuri.com.utility.Utils;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 public class PlayActivity extends BaseActivity {
@@ -58,6 +61,7 @@ public class PlayActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
+        ButterKnife.bind(this);
 
 
         initVariables();
@@ -190,7 +194,9 @@ public class PlayActivity extends BaseActivity {
     private int forwardTime = 2000, backwardTime = 2000;
     private Handler durationHandler = new Handler();
     private SeekBar seekbar;
-    private ImageButton btnStart;
+
+    @Bind(R.id.media_play)
+    View btnStart;
 
     public void initMediaPlayer() {
         mediaPlayer = MediaPlayer.create(this, Uri.parse(dir.getPath() + "/" + fileName));
@@ -220,22 +226,28 @@ public class PlayActivity extends BaseActivity {
 
             }
         });
-
-        btnStart = (ImageButton) findViewById(R.id.media_play);
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-`                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.pause();
-                } else {
-                    play();
-                }
-            }
-        });
+//
+//        btnStart.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//            }
+//        });
         if (mediaPlayer != null) {
             play();
         }
 
+    }
+
+    @OnClick(R.id.media_play)
+    void playAudio() {
+        if (mediaPlayer.isPlaying()) {
+            btnStart.setBackground(getResources().getDrawable(android.R.drawable.ic_media_play));
+            mediaPlayer.pause();
+        } else {
+            btnStart.setBackground(getResources().getDrawable(android.R.drawable.ic_media_pause));
+            play();
+        }
     }
 
     // play mp3 song
