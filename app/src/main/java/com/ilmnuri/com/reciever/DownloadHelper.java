@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ilmnuri.com.event.AudioEvent;
 import com.ilmnuri.com.model.Audio;
+import com.ilmnuri.com.utility.Utils;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -22,9 +23,7 @@ import java.util.HashMap;
 
 import de.greenrobot.event.EventBus;
 
-/**
- * Created by User on 18.05.2016.
- */
+
 public class DownloadHelper extends Service {
 
     DownloadManager downloadManager;
@@ -95,13 +94,13 @@ public class DownloadHelper extends Service {
                                         Audio audio1 = specialFeedItem.get(enqueue);
                                         specialFeedItem.get(enqueue).setDownloaded(true);
                                         EventBus.getDefault().post(AudioEvent.stop(audio1));
-//                                        Toast.makeText(DownloadHelper.this, audio1.getTrackName() + " yuklandi.", Toast.LENGTH_SHORT).show();
+                                        //Toast.makeText(DownloadHelper.this, audio1.getTrackName() + " yuklandi.", Toast.LENGTH_SHORT).show();
                                         counter++;
                                     }
 
                                 } else {
                                     if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_FAILED) {
-//                                        Utils.showToast(DownloadHelper.this, "Yuklashda xatolik bo'ldi?");
+                                        Utils.showToast(DownloadHelper.this, "Yuklashda xatolik bo'ldi?");
                                     }
                                 }
                                 cursor.close();

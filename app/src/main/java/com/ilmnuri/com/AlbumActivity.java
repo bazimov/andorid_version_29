@@ -1,6 +1,5 @@
 package com.ilmnuri.com;
 
-import android.app.DownloadManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -36,7 +36,6 @@ public class AlbumActivity extends BaseActivity {
     RecyclerView mRecyclerView;
     @Bind(R.id.tv_album_title)
     TextView tvTitle;
-    DownloadManager downloadManager;
     private File dir;
 
     String fileName;
@@ -74,8 +73,13 @@ public class AlbumActivity extends BaseActivity {
         }
         assert toolbar != null;
         dir = new File(getExternalFilesDir(null), "audio");
-        if (!dir.exists()) {
-            dir.mkdir();
+        boolean isDirectoryCreated=dir.exists();
+        if (!isDirectoryCreated) {
+            isDirectoryCreated= dir.mkdirs();
+        }
+        if(isDirectoryCreated) {
+            // do something
+            Log.d("mkdirs option", "Directory already exists.");
         }
         tvTitle.setText(albumModel.getCategory() + "/" + albumModel.getAlbum());
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -112,13 +116,9 @@ public class AlbumActivity extends BaseActivity {
                         Utils.deleteFile(dir.getPath() + "/" + title);
                         Utils.showToast(AlbumActivity.this, "Darslik o'chirib tashlandi!");
                         adpaterDemo.deleteItem(position);
-
-
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
-                        // No button clicked
-                        // do nothing
                         break;
                 }
             }

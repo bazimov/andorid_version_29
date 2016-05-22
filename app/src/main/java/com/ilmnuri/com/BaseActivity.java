@@ -12,9 +12,7 @@ import com.ilmnuri.com.application.IlmApplication;
 
 import butterknife.ButterKnife;
 
-/**
- * Created by User on 18.05.2016.
- */
+
 public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,12 +32,6 @@ public class BaseActivity extends AppCompatActivity {
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-//
-//    @Override
-//    protected void onDestroy() {
-//        EventBus.getDefault().unregister(this);
-//        super.onDestroy();
-//    }
 
     public IlmApplication getIlmApplication() {
         return (IlmApplication) getApplication();
